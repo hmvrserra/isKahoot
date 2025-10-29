@@ -10,6 +10,11 @@ public class IsKahootClient {
     private CardLayout cardLayout;
 
     public static final String WAITING_PANEL = "WAITING";
+    public static final String QUESTION_PANEL = "QUESTION";
+    public static final String SCOREBOARD_PANEL = "SCOREBOARD";
+
+    private QuestionPanel questionPanel;
+    private ScoreboardPanel scoreboardPanel;
 
     public IsKahootClient(String ip, String port, String room, String team, String username) {
         frame = new JFrame("IsKahoot");
@@ -25,8 +30,27 @@ public class IsKahootClient {
         WaitingPanel waitingPanel = new WaitingPanel();
         mainPanel.add(waitingPanel, WAITING_PANEL);
 
+        questionPanel = new  QuestionPanel();
+        mainPanel.add(questionPanel, QUESTION_PANEL);
+
+        scoreboardPanel = new  ScoreboardPanel();
+        mainPanel.add(scoreboardPanel, SCOREBOARD_PANEL);
+
         frame.add(mainPanel);
-        cardLayout.show(mainPanel, WAITING_PANEL);
+        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+
+        //----------------- TESTES ----------------------
+        /*
+        String[] dummyOptions = {"Opção A", "Opção B", "Opção C", "Opção D"};
+        questionPanel.setQuestion("Esta é uma pergunta de teste?", dummyOptions);
+         */
+        Object[][] testData = {
+                {"EquipaA", 250},
+                {"EquipaB", 180},
+                {"EquipaC", 120}
+        };
+        scoreboardPanel.updateScores("1º", "+50", "250", testData);
+        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
     }
 
     public void start() {
