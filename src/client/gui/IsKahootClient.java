@@ -33,7 +33,7 @@ public class IsKahootClient {
     public IsKahootClient(String ip, String port, String room, String team, String username) {
         
         frame = new JFrame("IsKahoot");
-        frame.setSize(800, 600); //Can be adjusted
+        frame.setSize(800, 600); // Ajustar altura aqui se quisermos mudar
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

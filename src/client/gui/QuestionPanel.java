@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-public class QuestionPanel extends JPanel {  // 1. extends JPanel
+public class QuestionPanel extends JPanel {
 
     private static final Color[] ANSWER_COLORS = {
             Color.decode("#ff5733"), // Vermelho
