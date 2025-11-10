@@ -10,10 +10,10 @@ import java.util.Scanner;
 
 public class QuizLoader {
 
-    public static QuizFile loadQuizzes(String filePath) {
+    public static QuizFile loadQuizzes() {
         Gson gson = new Gson();
         try {
-            Reader reader = new FileReader(filePath);
+            Reader reader = new FileReader("quizzes.json");
             QuizFile quizFile = gson.fromJson(reader, QuizFile.class);
             return quizFile;
         } catch (FileNotFoundException e) {
@@ -30,7 +30,7 @@ public class QuizLoader {
         //    com o conteúdo de exemplo do enunciado [cite: 104-156].
 
         System.out.println("A tentar carregar quizzes.json...");
-        QuizFile quizData = loadQuizzes("quizzes.json");
+        QuizFile quizData = loadQuizzes();
 
         if (quizData != null) {
             System.out.println("Ficheiro carregado com sucesso!");

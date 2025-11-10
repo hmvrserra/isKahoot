@@ -1,5 +1,9 @@
 package client.gui;
 
+import server.game.Question;
+import server.game.QuizFile;
+import server.game.QuizLoader;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -13,12 +17,22 @@ public class IsKahootClient {
     public static final String QUESTION_PANEL = "QUESTION";
     public static final String SCOREBOARD_PANEL = "SCOREBOARD";
 
-    private QuestionPanel questionPanel;
-    private ScoreboardPanel scoreboardPanel;
+    public void showQuestion(Question q) {
+        QuestionPanel qp = new QuestionPanel(q);  // cria com pergunta real
+        mainPanel.add(qp, QUESTION_PANEL);
+        cardLayout.show(mainPanel, QUESTION_PANEL);
+    }
+
+    public void showScoreboard(String pos, String change, String total, Object[][] data) {
+        ScoreboardPanel sp = new ScoreboardPanel();
+        sp.updateScores(pos, change, total, data);
+        mainPanel.add(sp, SCOREBOARD_PANEL);
+        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+    }
 
     public IsKahootClient(String ip, String port, String room, String team, String username) {
+        
         frame = new JFrame("IsKahoot");
-
         frame.setSize(800, 600); //Can be adjusted
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -26,31 +40,30 @@ public class IsKahootClient {
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
-
         WaitingPanel waitingPanel = new WaitingPanel();
         mainPanel.add(waitingPanel, WAITING_PANEL);
-
-        questionPanel = new  QuestionPanel();
-        mainPanel.add(questionPanel, QUESTION_PANEL);
-
-        scoreboardPanel = new  ScoreboardPanel();
-        mainPanel.add(scoreboardPanel, SCOREBOARD_PANEL);
-
         frame.add(mainPanel);
-        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
 
         //----------------- TESTES ----------------------
         /*
         String[] dummyOptions = {"Opção A", "Opção B", "Opção C", "Opção D"};
         questionPanel.setQuestion("Esta é uma pergunta de teste?", dummyOptions);
          */
-        Object[][] testData = {
-                {"EquipaA", 250},
-                {"EquipaB", 180},
-                {"EquipaC", 120}
-        };
-        scoreboardPanel.updateScores("1º", "+50", "250", testData);
-        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+//        Object[][] testData = {
+//                {"EquipaA", 250},
+//                {"EquipaB", 180},
+//                {"EquipaC", 120}
+//        };
+//        scoreboardPanel.updateScores("1º", "+50", "250", testData);
+//        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+        // No final do construtor, substitua os testes por:
+        QuizFile quizFile = QuizLoader.loadQuizzes();
+        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
+            Question first = quizFile.getQuizzes().get(0).getQuestions().get(0);
+            showQuestion(first);
+        } else {
+            cardLayout.show(mainPanel, WAITING_PANEL);
+        }
     }
 
     public void start() {
