@@ -12,7 +12,7 @@ public class GameState {
     private final Map<String, Team> teams;
     private final Map<String, Player> players;
     private final Map<String, Integer> teamScores;
-    
+    private final Map<String, String> currentRoundAnswers;
     int currentQuestionIndex;
     private final long roundTimeMillis = 30000;
     
@@ -25,6 +25,7 @@ public class GameState {
         this.teams = new ConcurrentHashMap<>();
         this.players = new ConcurrentHashMap<>();
         this.teamScores = new ConcurrentHashMap<>();
+        this.currentRoundAnswers = new ConcurrentHashMap<>();
         
         this.currentQuestionIndex = -1;
     } 
@@ -33,7 +34,7 @@ public class GameState {
     public String getRoomCode() {
         return roomCode;
     }
-    
+
     public int getNumTeams() {
         return numTeams;
     }
@@ -53,12 +54,16 @@ public class GameState {
     public Map<String, Integer> getTeamScores() {
         return teamScores;
     }
-    
+
+    public Map<String, String> getCurrentRoundAnswers() {
+        return currentRoundAnswers;
+    }
+
     public int getCurrentQuestionIndex() {
         return currentQuestionIndex;
     }
     
-    // --------------------------------- Game Logic Methods ---------------------------------
+    // Game Logic Methods
     
     public void addPlayer(Player player) {
         players.put(player.getUsername(), player);
@@ -68,8 +73,13 @@ public class GameState {
         teams.put(team.getTeamId(), team);
         teamScores.put(team.getTeamId(), 0);
     }
-    
     public void nextQuestion() {
         currentQuestionIndex++;
+    }
+    public void submitAnswer(String username, String answer){
+        currentRoundAnswers.put(username, answer);
+    }
+    public void clearRoundAnswers(){
+        currentRoundAnswers.clear();
     }
 }
