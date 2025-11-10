@@ -6,6 +6,9 @@ public class QuizFile {
 
     List<Quiz> quizzes;
 
+    public QuizFile(List<Quiz> quizzes) {
+        this.quizzes = quizzes;
+    }
     public List<Quiz> getQuizzes() {
         return quizzes;
     }

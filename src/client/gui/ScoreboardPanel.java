@@ -35,7 +35,7 @@ public class ScoreboardPanel extends JPanel {
         northPanel.add(statsPanel, BorderLayout.CENTER);
         add(northPanel, BorderLayout.NORTH);
 
-        //------------- PAINEL CENTRAL ----------------- //
+        // PAINEL CENTRAL
         String[] columnNames = {"Equipa", "Pontuação"};
         leaderBoardModel = new DefaultTableModel(columnNames, 0);
 
