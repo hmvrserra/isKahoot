@@ -1,11 +1,13 @@
 package client.gui;
 
 import server.game.Question;
+import server.game.Quiz;
 import server.game.QuizFile;
 import server.game.QuizLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class IsKahootClient {
 
@@ -17,18 +19,13 @@ public class IsKahootClient {
     public static final String QUESTION_PANEL = "QUESTION";
     public static final String SCOREBOARD_PANEL = "SCOREBOARD";
 
-    public void showQuestion(Question q) {
-        QuestionPanel qp = new QuestionPanel(q);  // cria com pergunta real
-        mainPanel.add(qp, QUESTION_PANEL);
-        cardLayout.show(mainPanel, QUESTION_PANEL);
-    }
+    private QuestionPanel questionPanel;
+    private ScoreboardPanel scoreboardPanel;
 
-    public void showScoreboard(String pos, String change, String total, Object[][] data) {
-        ScoreboardPanel sp = new ScoreboardPanel();
-        sp.updateScores(pos, change, total, data);
-        mainPanel.add(sp, SCOREBOARD_PANEL);
-        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
-    }
+    //ATRIBUTOS TESTE PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
+
+    private List<Question> allQuestions;
+    private int currentQuestionIndex = -1;
 
     public IsKahootClient(String ip, String port, String room, String team, String username) {
         
@@ -40,35 +37,68 @@ public class IsKahootClient {
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
+
         WaitingPanel waitingPanel = new WaitingPanel();
+        questionPanel = new QuestionPanel(this);
+        scoreboardPanel = new ScoreboardPanel();
+
+        mainPanel.add(questionPanel, QUESTION_PANEL);
+        mainPanel.add(scoreboardPanel, SCOREBOARD_PANEL);
         mainPanel.add(waitingPanel, WAITING_PANEL);
+
         frame.add(mainPanel);
 
-        //----------------- TESTES ----------------------
-        /*
-        String[] dummyOptions = {"Opção A", "Opção B", "Opção C", "Opção D"};
-        questionPanel.setQuestion("Esta é uma pergunta de teste?", dummyOptions);
-         */
-//        Object[][] testData = {
-//                {"EquipaA", 250},
-//                {"EquipaB", 180},
-//                {"EquipaC", 120}
-//        };
-//        scoreboardPanel.updateScores("1º", "+50", "250", testData);
-//        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
-        // No final do construtor, substitua os testes por:
-        QuizFile quizFile = QuizLoader.loadQuizzes();
-        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
-            Question first = quizFile.getQuizzes().get(0).getQuestions().get(0);
-            showQuestion(first);
+        // PRIEMIRA DEMONSTRACAO (APAGAR DEPOIS)
+        loadQuiz();
+
+        if(allQuestions != null && !allQuestions.isEmpty()) {
+            requestNextQuestion();
         } else {
+            System.err.println("No questions found!");
             cardLayout.show(mainPanel, WAITING_PANEL);
         }
+
     }
 
     public void start() {
         frame.setVisible(true);
     }
+
+    public void showQuestion(String questionText, String[] options) {
+        questionPanel.setQuestion(questionText, options);
+        cardLayout.show(mainPanel, QUESTION_PANEL);
+    }
+
+//    public void showScoreboard(String pos, String change, String total, Object[][] data) {
+//        ScoreboardPanel sp = new ScoreboardPanel();
+//        sp.updateScores(pos, change, total, data);
+//        mainPanel.add(sp, SCOREBOARD_PANEL);
+//        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+//    }
+
+    //TESTES PARA PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
+
+    private void loadQuiz(){
+        QuizFile quizFile = QuizLoader.loadQuizzes();
+        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
+            Quiz firstQuiz = quizFile.getQuizzes().getFirst();
+            allQuestions = firstQuiz.getQuestions();
+        }
+    }
+
+    public void requestNextQuestion() {
+        currentQuestionIndex++;
+        if(allQuestions != null && currentQuestionIndex < allQuestions.size()) {
+            Question nextQuestion = allQuestions.get(currentQuestionIndex);
+            String questionText = nextQuestion.getQuestion();
+            String[] options = nextQuestion.getOptions().toArray(new String[0]);
+            showQuestion(questionText, options);
+        } else {
+            System.out.println("Fim do quiz");
+            cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+        }
+    }
+
 
     public static void main(String[] args) {
         if(args.length != 5) {
