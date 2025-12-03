@@ -1,5 +1,7 @@
 package client.gui;
 
+import client.net.ServerConnection;
+import common.LoginRequest;
 import server.game.Question;
 import server.game.Quiz;
 import server.game.QuizFile;
@@ -7,7 +9,10 @@ import server.game.QuizLoader;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
+
+import static java.lang.Integer.parseInt;
 
 public class IsKahootClient {
 
@@ -21,6 +26,8 @@ public class IsKahootClient {
 
     private QuestionPanel questionPanel;
     private ScoreboardPanel scoreboardPanel;
+
+    private ServerConnection connection;
 
     //ATRIBUTOS TESTE PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
 
@@ -48,15 +55,26 @@ public class IsKahootClient {
 
         frame.add(mainPanel);
 
-        // PRIEMIRA DEMONSTRACAO (APAGAR DEPOIS)
-        loadQuiz();
-
-        if(allQuestions != null && !allQuestions.isEmpty()) {
-            requestNextQuestion();
-        } else {
-            System.err.println("No questions found!");
+        try{
+            this.connection = new ServerConnection(ip, Integer.parseInt(port));
+            LoginRequest loginRequest = new LoginRequest(username, team, room);
+            connection.sendLogin(loginRequest);
             cardLayout.show(mainPanel, WAITING_PANEL);
+        } catch (IOException e) {
+            showError();
+            e.printStackTrace();
+            System.exit(1);
         }
+
+        // PRIMEIRA DEMONSTRACAO (UTILIZAR DEPOIS TALVEZ)
+//        loadQuiz();
+//
+//        if(allQuestions != null && !allQuestions.isEmpty()) {
+//            requestNextQuestion();
+//        } else {
+//            System.err.println("No questions found!");
+//            cardLayout.show(mainPanel, WAITING_PANEL);
+//        }
 
     }
 
@@ -69,6 +87,10 @@ public class IsKahootClient {
         cardLayout.show(mainPanel, QUESTION_PANEL);
     }
 
+    private void showError(){
+        JOptionPane.showMessageDialog(frame, "Can't connect to server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+    }
+
 //    public void showScoreboard(String pos, String change, String total, Object[][] data) {
 //        ScoreboardPanel sp = new ScoreboardPanel();
 //        sp.updateScores(pos, change, total, data);
@@ -76,28 +98,28 @@ public class IsKahootClient {
 //        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
 //    }
 
-    //TESTES PARA PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
+    //TESTES PARA PRIMEIRA DEMONSTRACAO (UTILIZAR DEPOIS TALVEZ)
 
-    private void loadQuiz(){
-        QuizFile quizFile = QuizLoader.loadQuizzes();
-        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
-            Quiz firstQuiz = quizFile.getQuizzes().getFirst();
-            allQuestions = firstQuiz.getQuestions();
-        }
-    }
-
-    public void requestNextQuestion() {
-        currentQuestionIndex++;
-        if(allQuestions != null && currentQuestionIndex < allQuestions.size()) {
-            Question nextQuestion = allQuestions.get(currentQuestionIndex);
-            String questionText = nextQuestion.getQuestion();
-            String[] options = nextQuestion.getOptions().toArray(new String[0]);
-            showQuestion(questionText, options);
-        } else {
-            System.out.println("Fim do quiz");
-            cardLayout.show(mainPanel, SCOREBOARD_PANEL);
-        }
-    }
+//    private void loadQuiz(){
+//        QuizFile quizFile = QuizLoader.loadQuizzes();
+//        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
+//            Quiz firstQuiz = quizFile.getQuizzes().getFirst();
+//            allQuestions = firstQuiz.getQuestions();
+//        }
+//    }
+//
+//    public void requestNextQuestion() {
+//        currentQuestionIndex++;
+//        if(allQuestions != null && currentQuestionIndex < allQuestions.size()) {
+//            Question nextQuestion = allQuestions.get(currentQuestionIndex);
+//            String questionText = nextQuestion.getQuestion();
+//            String[] options = nextQuestion.getOptions().toArray(new String[0]);
+//            showQuestion(questionText, options);
+//        } else {
+//            System.out.println("Fim do quiz");
+//            cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+//        }
+//    }
 
 
     public static void main(String[] args) {

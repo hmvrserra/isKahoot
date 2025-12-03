@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class QuestionPanel extends JPanel implements ActionListener {
+public class QuestionPanel extends JPanel {
 
     private JLabel questionLabel;
     private JButton[] answerButtons;
@@ -42,7 +42,7 @@ public class QuestionPanel extends JPanel implements ActionListener {
         for (int i = 0; i < 4; i++) {
             answerButtons[i] = new JButton();
             answerButtons[i].setFont(new Font("Arial", Font.PLAIN, 20));
-            answerButtons[i].addActionListener(this); // PODE SE APAGAR DEPOIS DA PRIMEIRA DEMONSTRACAO
+            //answerButtons[i].addActionListener(this); // PODE SE APAGAR DEPOIS DA PRIMEIRA DEMONSTRACAO
             answerButtons[i].setForeground(Color.WHITE);
             answerButtons[i].setBackground(ANSWER_COLORS[i]);
             answerButtons[i].setOpaque(true);
@@ -65,9 +65,9 @@ public class QuestionPanel extends JPanel implements ActionListener {
         }
     }
 
-    // METODOS PRIMEIRA DEMOSNTRACAO (APAGAR DEPOIS)
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        mainApp.requestNextQuestion();
-    }
+    // METODOS PRIMEIRA DEMOSNTRACAO (UTILZAR DEPOIS TALVEZ)
+//    @Override
+//    public void actionPerformed(ActionEvent e) {
+//        mainApp.requestNextQuestion();
+//    }
 }
