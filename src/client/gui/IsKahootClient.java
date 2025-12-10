@@ -2,10 +2,12 @@ package client.gui;
 
 import client.net.ServerConnection;
 import common.LoginRequest;
+import common.LoginResponse;
 import server.game.Question;
 import server.game.Quiz;
 import server.game.QuizFile;
 import server.game.QuizLoader;
+import server.net.Server;
 
 import javax.swing.*;
 import java.awt.*;
@@ -59,9 +61,22 @@ public class IsKahootClient {
             this.connection = new ServerConnection(ip, Integer.parseInt(port));
             LoginRequest loginRequest = new LoginRequest(username, team, room);
             connection.sendLogin(loginRequest);
-            cardLayout.show(mainPanel, WAITING_PANEL);
+            System.out.println("Sent login request");
+            try{
+                LoginResponse loginResponse = connection.getLoginResponse();
+                if(loginResponse.isSuccess()){
+                    System.out.println("Login successful: " +  loginResponse.getMessage());
+                    cardLayout.show(mainPanel, WAITING_PANEL);
+                } else  {
+                    System.out.println("Login failed: " +  loginResponse.getMessage());
+                    System.exit(1);
+                }
+            } catch (ClassNotFoundException e) {
+                System.out.println("Error reading response from server");
+                e.printStackTrace();
+            }
         } catch (IOException e) {
-            showError();
+            showError("Can't connect to server");
             e.printStackTrace();
             System.exit(1);
         }
@@ -87,8 +102,8 @@ public class IsKahootClient {
         cardLayout.show(mainPanel, QUESTION_PANEL);
     }
 
-    private void showError(){
-        JOptionPane.showMessageDialog(frame, "Can't connect to server", "Connection Error", JOptionPane.ERROR_MESSAGE);
+    private void showError(String message){
+        JOptionPane.showMessageDialog(frame, message, "Connection Error", JOptionPane.ERROR_MESSAGE);
     }
 
 //    public void showScoreboard(String pos, String change, String total, Object[][] data) {

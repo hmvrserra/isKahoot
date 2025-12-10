@@ -1,6 +1,7 @@
 package client.net;
 
 import common.LoginRequest;
+import common.LoginResponse;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,6 +34,10 @@ public class ServerConnection {
         out.writeObject(loginRequest);
         out.flush();
         out.reset();
+    }
+
+    public LoginResponse getLoginResponse() throws IOException, ClassNotFoundException {
+        return (LoginResponse) in.readObject();
     }
 
 }

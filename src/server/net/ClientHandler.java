@@ -1,5 +1,8 @@
 package server.net;
 
+import common.LoginRequest;
+import common.LoginResponse;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketException;
@@ -39,15 +42,21 @@ public class ClientHandler extends Thread {
     private void read() throws IOException, ClassNotFoundException {
         while(true){
             Object received = in.readObject();
+            if(received instanceof LoginRequest){
+                LoginRequest loginRequest = (LoginRequest) received;
+                System.out.println("Received login from: " + loginRequest.getUsername());
 
+                LoginResponse loginResponse = new LoginResponse(true, "Welcome " + loginRequest.getUsername());
+                send(loginResponse);
+            }
             System.out.println("Server received: " +  received.getClass().getName());
         }
     }
 
-    public synchronized void write() throws IOException {
+    public synchronized void send(Object obj) throws IOException {
         try{
             if(!connection.isClosed()){
-                out.writeObject(connection);
+                out.writeObject(obj);
                 out.flush();
                 out.reset();
             }
