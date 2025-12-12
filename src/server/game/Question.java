@@ -4,14 +4,18 @@ import java.util.List;
 
 public class Question {
 
-    String question;
-    int points;
-    int correct;
-    List<String> options;
+    private String question;
+    private int points;
+    private int correct;
+    private boolean team;
+    private String[] options;
 
-    public Question(String question, int points) {
+    public Question(String question, int points, int correct, boolean team, String[] options) {
         this.question = question;
         this.points = points;
+        this.correct = correct;
+        this.team = team;
+        this.options = options;
     }
 
     public String getQuestion() {
@@ -23,7 +27,10 @@ public class Question {
     public int getCorrect() {
         return correct;
     }
-    public List<String> getOptions() {
+    public String[] getOptions() {
         return options;
+    }
+    public boolean isTeam() {
+        return team;
     }
 }

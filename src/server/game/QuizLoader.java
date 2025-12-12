@@ -17,7 +17,7 @@ public class QuizLoader {
             QuizFile quizFile = gson.fromJson(reader, QuizFile.class);
             return quizFile;
         } catch (FileNotFoundException e) {
-            System.out.println("ERRO: Ficheiro do quiz não encontrado");
+            System.out.println("ERROR: Quiz file not found.");
             e.printStackTrace();
             return null;
         }

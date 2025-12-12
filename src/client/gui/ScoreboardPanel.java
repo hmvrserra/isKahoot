@@ -48,14 +48,14 @@ public class ScoreboardPanel extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    public void updateScores(String position, String roundPoints, String totalPoints, Object[][] teamData) {
+    public void updateScores(String position, String roundPoints, String totalPoints, String[][] leaderboard) {
         positionLabel.setText("Posição: " + position);
         roundPointsLabel.setText("Ronda: " + roundPoints);
         totalPointsLabel.setText("Total: " + totalPoints);
 
         leaderBoardModel.setRowCount(0);
 
-        for(Object[] row : teamData){
+        for(String[] row : leaderboard){
             leaderBoardModel.addRow(row);
         }
     }
