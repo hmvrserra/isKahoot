@@ -4,11 +4,13 @@ public class Player {
     String username;
     String teamId;
     String roomId;
+    int pointsEarned;
     
     public Player(String username, String teamId, String roomId) {
         this.username = username;
         this.teamId = teamId;
         this.roomId = roomId;
+        this.pointsEarned = 0;
     }
     
     public String getUsername() {
@@ -21,5 +23,12 @@ public class Player {
     
     public String getRoomId() {
         return roomId;
+    }
+    public int getPointsEarned() {
+        return pointsEarned;
+    }
+
+    public void addPoints(int pointsEarned){
+        this.pointsEarned += pointsEarned;
     }
 }

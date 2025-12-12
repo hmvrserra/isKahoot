@@ -1,10 +1,13 @@
 package server.game;
 
+import java.util.List;
+
 public class Team {
     
-    public String teamId;
-    public String teamName;
-    public int teamScore;
+    private String teamId;
+    private String teamName;
+    private int teamScore;
+    private List<Player> players;
     
     public Team(String teamId, String teamName, int teamScore) {
         this.teamId = teamId;
@@ -22,5 +25,13 @@ public class Team {
     
     public int getTeamScore() {
         return teamScore;
+    }
+
+    public void addScore(int pointsEarned){
+        this.teamScore += pointsEarned;
+    }
+
+    public void addPlayer(Player player){
+        players.add(player);
     }
 }

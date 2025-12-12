@@ -6,9 +6,9 @@ import java.util.List;
 public class QuestionDTO implements Serializable {
 
     private String question;
-    private List<String> options;
+    private String[] options;
 
-    public QuestionDTO(String question, List<String> options) {
+    public QuestionDTO(String question, String[] options) {
         this.question = question;
         this.options = options;
     }
@@ -16,7 +16,7 @@ public class QuestionDTO implements Serializable {
     public String getQuestion() {
         return question;
     }
-    public List<String> getOptions() {
+    public String[] getOptions() {
         return options;
     }
 }

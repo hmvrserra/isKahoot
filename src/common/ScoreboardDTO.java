@@ -7,11 +7,13 @@ public class ScoreboardDTO implements Serializable {
     private String position;
     private String roundPoints;
     private String totalPoints;
+    private String[][] leaderboard;
 
-    public ScoreboardDTO(String position, String roundPoints, String totalPoints) {
+    public ScoreboardDTO(String position, String roundPoints, String totalPoints, String[][] leaderboard) {
         this.position = position;
         this.roundPoints = roundPoints;
         this.totalPoints = totalPoints;
+        this.leaderboard = leaderboard;
     }
 
     public String getPosition() {
@@ -22,5 +24,8 @@ public class ScoreboardDTO implements Serializable {
     }
     public String getTotalPoints() {
         return totalPoints;
+    }
+    public String[][] getLeaderboard() {
+        return leaderboard;
     }
 }

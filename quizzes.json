@@ -7,6 +7,7 @@
           "question": "O que e uma thread?",
           "points": 5,
           "correct": 3,
+          "team": false,
           "options": [
             "Processo",
             "Aplicacao",
@@ -18,6 +19,7 @@
           "question": "Qual destas operacoes nao e um metodo bloqueante?",
           "points": 3,
           "correct": 2,
+          "team": true,
           "options": [
             "join()",
             "sleep(<millis>)",

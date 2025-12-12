@@ -3,6 +3,8 @@ package client.gui;
 import client.net.ServerConnection;
 import common.LoginRequest;
 import common.LoginResponse;
+import common.QuestionDTO;
+import common.ScoreboardDTO;
 import server.game.Question;
 import server.game.Quiz;
 import server.game.QuizFile;
@@ -33,8 +35,8 @@ public class IsKahootClient {
 
     //ATRIBUTOS TESTE PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
 
-    private List<Question> allQuestions;
-    private int currentQuestionIndex = -1;
+    // private List<Question> allQuestions;
+    // private int currentQuestionIndex = -1;
 
     public IsKahootClient(String ip, String port, String room, String team, String username) {
         
@@ -58,47 +60,26 @@ public class IsKahootClient {
         frame.add(mainPanel);
 
         try{
-            this.connection = new ServerConnection(ip, Integer.parseInt(port));
-            LoginRequest loginRequest = new LoginRequest(username, team, room);
-            connection.sendLogin(loginRequest);
-            System.out.println("Sent login request");
-            try{
-                LoginResponse loginResponse = connection.getLoginResponse();
-                if(loginResponse.isSuccess()){
-                    System.out.println("Login successful: " +  loginResponse.getMessage());
-                    cardLayout.show(mainPanel, WAITING_PANEL);
-                } else  {
-                    System.out.println("Login failed: " +  loginResponse.getMessage());
-                    System.exit(1);
-                }
-            } catch (ClassNotFoundException e) {
-                System.out.println("Error reading response from server");
-                e.printStackTrace();
+            connection = new ServerConnection(ip, Integer.parseInt(port), this);
+            boolean successfulLogin = connection.login(username, team, room);
+            if(successfulLogin){
+                cardLayout.show(mainPanel, WAITING_PANEL);
+            }else {
+                showError("Login failed or room does not exist");
             }
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             showError("Can't connect to server");
             e.printStackTrace();
             System.exit(1);
         }
-
-        // PRIMEIRA DEMONSTRACAO (UTILIZAR DEPOIS TALVEZ)
-//        loadQuiz();
-//
-//        if(allQuestions != null && !allQuestions.isEmpty()) {
-//            requestNextQuestion();
-//        } else {
-//            System.err.println("No questions found!");
-//            cardLayout.show(mainPanel, WAITING_PANEL);
-//        }
-
     }
 
     public void start() {
         frame.setVisible(true);
     }
 
-    public void showQuestion(String questionText, String[] options) {
-        questionPanel.setQuestion(questionText, options);
+    public void showQuestion(QuestionDTO question) {
+        questionPanel.setQuestion(question.getQuestion(), question.getOptions());
         cardLayout.show(mainPanel, QUESTION_PANEL);
     }
 
@@ -106,36 +87,16 @@ public class IsKahootClient {
         JOptionPane.showMessageDialog(frame, message, "Connection Error", JOptionPane.ERROR_MESSAGE);
     }
 
-//    public void showScoreboard(String pos, String change, String total, Object[][] data) {
-//        ScoreboardPanel sp = new ScoreboardPanel();
-//        sp.updateScores(pos, change, total, data);
-//        mainPanel.add(sp, SCOREBOARD_PANEL);
-//        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
-//    }
+    public void showScoreboard(ScoreboardDTO scoreboard) {
+        scoreboardPanel.updateScores(scoreboard.getPosition(), scoreboard.getRoundPoints(), scoreboard.getTotalPoints(), scoreboard.getLeaderboard());
+        cardLayout.show(mainPanel, SCOREBOARD_PANEL);
+    }
 
-    //TESTES PARA PRIMEIRA DEMONSTRACAO (UTILIZAR DEPOIS TALVEZ)
-
-//    private void loadQuiz(){
-//        QuizFile quizFile = QuizLoader.loadQuizzes();
-//        if (quizFile != null && !quizFile.getQuizzes().isEmpty()) {
-//            Quiz firstQuiz = quizFile.getQuizzes().getFirst();
-//            allQuestions = firstQuiz.getQuestions();
-//        }
-//    }
-//
-//    public void requestNextQuestion() {
-//        currentQuestionIndex++;
-//        if(allQuestions != null && currentQuestionIndex < allQuestions.size()) {
-//            Question nextQuestion = allQuestions.get(currentQuestionIndex);
-//            String questionText = nextQuestion.getQuestion();
-//            String[] options = nextQuestion.getOptions().toArray(new String[0]);
-//            showQuestion(questionText, options);
-//        } else {
-//            System.out.println("Fim do quiz");
-//            cardLayout.show(mainPanel, SCOREBOARD_PANEL);
-//        }
-//    }
-
+    public void submitAnswer(int answerIndex) {
+        if(connection != null){
+            connection.sendAnswer(answerIndex);
+        }
+    }
 
     public static void main(String[] args) {
         if(args.length != 5) {

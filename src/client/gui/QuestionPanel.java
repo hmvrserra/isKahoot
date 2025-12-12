@@ -4,8 +4,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
-public class QuestionPanel extends JPanel {
+public class QuestionPanel extends JPanel implements ActionListener {
 
     private JLabel questionLabel;
     private JButton[] answerButtons;
@@ -17,7 +18,6 @@ public class QuestionPanel extends JPanel {
             Color.decode("#f1c40f")  // Amarelo
     };
 
-    // ATRIBUTOS PRIMEIRA DEMONSTRACAO (APAGAR DEPOIS)
     IsKahootClient mainApp;
 
     public QuestionPanel(IsKahootClient mainApp) {
@@ -42,11 +42,11 @@ public class QuestionPanel extends JPanel {
         for (int i = 0; i < 4; i++) {
             answerButtons[i] = new JButton();
             answerButtons[i].setFont(new Font("Arial", Font.PLAIN, 20));
-            //answerButtons[i].addActionListener(this); // PODE SE APAGAR DEPOIS DA PRIMEIRA DEMONSTRACAO
             answerButtons[i].setForeground(Color.WHITE);
             answerButtons[i].setBackground(ANSWER_COLORS[i]);
             answerButtons[i].setOpaque(true);
             answerButtons[i].setBorderPainted(false);
+            answerButtons[i].addActionListener(this);
             buttonPanel.add(answerButtons[i]);
         }
 
@@ -59,15 +59,28 @@ public class QuestionPanel extends JPanel {
             if(i < options.length) {
                 answerButtons[i].setText(options[i]);
                 answerButtons[i].setVisible(true);
+                answerButtons[i].setEnabled(true);
             } else {
                 answerButtons[i].setVisible(false);
             }
         }
     }
 
-    // METODOS PRIMEIRA DEMOSNTRACAO (UTILZAR DEPOIS TALVEZ)
-//    @Override
-//    public void actionPerformed(ActionEvent e) {
-//        mainApp.requestNextQuestion();
-//    }
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        for(int i = 0; i < answerButtons.length; i++) {
+            if(source == answerButtons[i]) {
+                disableButtons();
+                mainApp.submitAnswer(i);
+                return;
+            }
+        }
+    }
+
+    private void disableButtons() {
+        for(JButton button : answerButtons) {
+            button.setEnabled(false);
+        }
+    }
 }
