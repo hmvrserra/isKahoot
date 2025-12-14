@@ -89,7 +89,6 @@ public class ClientHandler extends Thread {
             if(!connection.isClosed()){
                 out.writeObject(obj);
                 out.flush();
-                out.reset();
             }
         } catch(IOException e) {
             System.out.println("Error during writing");

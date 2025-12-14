@@ -19,6 +19,10 @@ public class CountDownLatch {
         }
     }
 
+    public synchronized void await() throws InterruptedException {
+        await(30000); // 30 seconds timeout
+    }
+
     public synchronized int countDown() {
         int bonusMultiplier = 1;
         if(count > 0) {

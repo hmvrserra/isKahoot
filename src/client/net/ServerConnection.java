@@ -90,7 +90,6 @@ public class ServerConnection extends Thread {
             Answer answer = new Answer(answerIndex);
             out.writeObject(answer);
             out.flush();
-            out.reset();
         }catch (IOException e){
             e.printStackTrace();
         }

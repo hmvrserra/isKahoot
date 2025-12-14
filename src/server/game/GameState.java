@@ -8,9 +8,11 @@ import server.net.ClientHandler;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 
 public class GameState {
 
@@ -33,6 +35,7 @@ public class GameState {
     private Question currentQuestion;
     private ScoreboardDTO scoreboard;
     private final long roundTimeMillis = 30000;
+    private boolean nextRoundStarted = false;
 
 
     public GameState(String roomCode, int numTeams, int numPlayersPerTeam, Quiz quiz) {
@@ -55,6 +58,7 @@ public class GameState {
         });
 
         this.currentQuestionIndex = -1;
+        Collections.shuffle(quiz.questions);
     }
 
 
@@ -70,6 +74,7 @@ public class GameState {
     }
 
     public void startRound() throws IOException {
+        nextRoundStarted = false;
         barrier.reset();
         roundLatch = new CountDownLatch(maxPlayers);
         pendingTeamRoundPoints.clear();
@@ -98,6 +103,7 @@ public class GameState {
     }
 
     public void submitAnswer(String username, int answerIndex) throws InterruptedException, IOException {
+        if (currentQuestion == null) return; // Game ended, ignore late answers
         Player player = players.get(username);
         boolean isCorrectAnswer = isCorrectAnswer(answerIndex);
         int pointsEarned = 0;
@@ -108,15 +114,21 @@ public class GameState {
                 player.addPoints(pointsEarned);
                 teamScores.merge(player.getTeamId(), pointsEarned, Integer::sum); // Nas perguntas individuais a classificação de uma equipa é a soma dos valores obtidos por cada jogador;
             }
-            roundLatch.await(roundTimeMillis);
+            roundLatch.await();
         } else {
             if(isCorrectAnswer) {
                 pointsEarned = currentQuestion.getPoints();
                 pendingTeamRoundPoints.merge(player.getTeamId(), pointsEarned, Integer::sum);
             }
-            barrier.await(roundTimeMillis);
+            barrier.await();
         }
         updateScoreboard(username, pointsEarned);
+        synchronized(this) {
+            if (!nextRoundStarted) {
+                nextRoundStarted = true;
+                startNextRound();
+            }
+        }
     }
 
     public boolean isCorrectAnswer(int answerIndex) {
@@ -187,5 +199,19 @@ public class GameState {
                 }
             }
         }
+        synchronized(this) {
+            if (!nextRoundStarted) {
+                nextRoundStarted = true;
+                try {
+                    startNextRound();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private synchronized void startNextRound() throws IOException {
+        startRound();
     }
 }

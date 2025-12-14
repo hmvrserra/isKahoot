@@ -83,16 +83,21 @@ public class Server {
     public static synchronized boolean gameExists(String room){
         return games.containsKey(room);
     }
-
+    
     public synchronized String createRoomCode(Quiz quiz){
-        String quizName = quiz.getName();
-        int random = (int) (Math.random() * 1000);
-        String roomCode = quizName + "_Room" + random;
-        while(gameExists(roomCode)){
-            roomCode = createRoomCode(quiz);
-        }
+        String roomCode = quiz.getName() + "_Room";
         return roomCode;
     }
+    
+//    public synchronized String createRoomCode(Quiz quiz){
+//        String quizName = quiz.getName();
+//        int random = (int) (Math.random() * 1000);
+//        String roomCode = quizName + "_Room" + random;
+//        while(gameExists(roomCode)){
+//            roomCode = createRoomCode(quiz);
+//        }
+//        return roomCode;
+//    }
 
     private synchronized Quiz getRandomQuiz(){
         Quiz quiz = null;

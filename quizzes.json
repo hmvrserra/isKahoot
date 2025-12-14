@@ -26,6 +26,66 @@
             "interrupted()",
             "wait()"
           ]
+        },
+        {
+          "question": "Qual é a interface funcional utilizada para definir o código que uma thread executa?",
+          "points": 5,
+          "correct": 1,
+          "team": false,
+          "options": [
+            "Executable",
+            "Runnable",
+            "Threadable",
+            "Process"
+          ]
+        },
+        {
+          "question": "Que palavra-chave é usada em Java para garantir a exclusão mútua num bloco de código?",
+          "points": 4,
+          "correct": 0,
+          "team": false,
+          "options": [
+            "synchronized",
+            "locked",
+            "atomic",
+            "exclusive"
+          ]
+        },
+        {
+          "question": "O que acontece se invocar diretamente o método run() em vez de start()?",
+          "points": 5,
+          "correct": 2,
+          "team": true,
+          "options": [
+            "O programa termina com erro",
+            "É criada uma nova thread",
+            "O código executa na thread atual",
+            "O compilador não permite"
+          ]
+        },
+        {
+          "question": "Qual destas situações descreve um Deadlock?",
+          "points": 5,
+          "correct": 3,
+          "team": true,
+          "options": [
+            "Uma thread consome muito CPU",
+            "Duas threads escrevem na mesma variável",
+            "Uma thread termina inesperadamente",
+            "Duas threads esperam indefinidamente uma pela outra"
+          ]
+        },
+        {
+          "question": "Para que serve a palavra-chave 'volatile'?",
+          "points": 4,
+          "correct": 1,
+          "team": false,
+          "options": [
+            "Impedir o acesso simultâneo",
+            "Garantir a visibilidade de alterações entre threads",
+            "Tornar a variável constante",
+            "Parar a execução da thread"
+          ]
         }
       ]
     }

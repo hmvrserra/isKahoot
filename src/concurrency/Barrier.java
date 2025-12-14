@@ -49,6 +49,10 @@ public class Barrier {
         }
     }
 
+    public void await() throws InterruptedException {
+        await(30000); // 30 seconds timeout
+    }
+
     public void reset(){
         lock.lock();
         try{
