@@ -26,8 +26,6 @@ public class QuizLoader {
     // --- Método de Teste ---
     // (Podes executar este main para testar apenas esta funcionalidade)
     public static void main(String[] args) {
-        // 1. Cria um ficheiro "quizzes.json" na raiz do teu projeto
-        //    com o conteúdo de exemplo do enunciado [cite: 104-156].
 
         System.out.println("A tentar carregar quizzes.json...");
         QuizFile quizData = loadQuizzes();
