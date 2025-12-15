@@ -1,10 +1,7 @@
 package client.gui;
 
 import client.net.ServerConnection;
-import common.LoginRequest;
-import common.LoginResponse;
-import common.QuestionDTO;
-import common.ScoreboardDTO;
+import common.*;
 import server.game.Question;
 import server.game.Quiz;
 import server.game.QuizFile;
@@ -27,6 +24,7 @@ public class IsKahootClient {
     public static final String WAITING_PANEL = "WAITING";
     public static final String QUESTION_PANEL = "QUESTION";
     public static final String SCOREBOARD_PANEL = "SCOREBOARD";
+    public static final String GAMEOVER_PANEL = "GAMEOVER";
 
     private QuestionPanel questionPanel;
     private ScoreboardPanel scoreboardPanel;
@@ -40,7 +38,7 @@ public class IsKahootClient {
 
     public IsKahootClient(String ip, String port, String room, String team, String username) {
         
-        frame = new JFrame("IsKahoot");
+        frame = new JFrame("IsKahoot - " + username);
         frame.setSize(800, 600); // Ajustar altura aqui se quisermos mudar
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
@@ -96,6 +94,12 @@ public class IsKahootClient {
         if(connection != null){
             connection.sendAnswer(answerIndex);
         }
+    }
+
+    public void finishGame(GameOverDTO gameOver){
+        GameOverPanel gameOverPanel = new GameOverPanel(gameOver.getWinnerTeamId());
+        mainPanel.add(gameOverPanel, GAMEOVER_PANEL);
+        cardLayout.show(mainPanel, GAMEOVER_PANEL);
     }
 
     public static void main(String[] args) {
