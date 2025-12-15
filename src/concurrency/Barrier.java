@@ -14,20 +14,18 @@ public class Barrier {
     private final Lock lock =  new ReentrantLock();
     private final Condition condition = lock.newCondition();
 
-    public Barrier(int totalPlayers, Runnable barrierAction) {
+    private final long startTime;
+    private final int waitPeriod;
+
+    public Barrier(int totalPlayers, int waitPeriod, Runnable barrierAction) {
         this.totalPlayers = totalPlayers;
+        this.waitPeriod = waitPeriod;
         this.count = 0;
         this.barrierAction = barrierAction;
+        this.startTime = System.currentTimeMillis();
     }
 
-    public int getTotalPlayers() {
-        return totalPlayers;
-    }
-    public int getCount() {
-        return count;
-    }
-
-    public void await(long timeout) throws InterruptedException {
+    public void await() throws InterruptedException {
         lock.lock();
         try {
             count++;
@@ -35,10 +33,17 @@ public class Barrier {
                 triggerBarrier();
             } else{
                 try{
-                    boolean arrivedOnTime = condition.await(timeout, TimeUnit.MILLISECONDS);
-                    if(!arrivedOnTime){
+                    long endTime = startTime + waitPeriod;
+                    long remainingTime = endTime - System.currentTimeMillis();
+                    if(remainingTime <= 0){
                         if(count < totalPlayers)
                             triggerBarrier();
+                    } else {
+                        boolean arrivedOnTime = condition.await(remainingTime, TimeUnit.MILLISECONDS);
+                        if(!arrivedOnTime){
+                            if(count < totalPlayers)
+                                triggerBarrier();
+                        }
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();

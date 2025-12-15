@@ -76,11 +76,11 @@ public class Server {
         }
     }
 
-    public static synchronized GameState getGame(String room){
+    public static GameState getGame(String room){
         return games.get(room);
     }
 
-    public static synchronized boolean gameExists(String room){
+    public static boolean gameExists(String room){
         return games.containsKey(room);
     }
 
@@ -94,7 +94,11 @@ public class Server {
         return roomCode;
     }
 
-    private synchronized Quiz getRandomQuiz(){
+//    public synchronized String createRoomCode(Quiz quiz){
+//        return quiz.getName() + "_Room";
+//    }
+
+    private Quiz getRandomQuiz(){
         Quiz quiz = null;
         int random = (int) (Math.random() * quizFile.getQuizzes().size());
         quiz = quizFile.getQuizzes().get(random);
@@ -109,6 +113,12 @@ public class Server {
         Scanner scanner = new Scanner(System.in);
 
         while(true) {
+            if(!games.isEmpty()){
+                System.out.println("Available rooms:");
+                for(String roomCode : games.keySet()){
+                    System.out.println(roomCode);
+                }
+            }
             String input = scanner.nextLine();
             if(input.isEmpty()) continue;
 

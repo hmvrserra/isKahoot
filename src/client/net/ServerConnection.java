@@ -40,6 +40,9 @@ public class ServerConnection extends Thread {
                 } else if(received instanceof ScoreboardDTO){
                     ScoreboardDTO scoreboard = (ScoreboardDTO) received;
                     SwingUtilities.invokeLater(() -> client.showScoreboard(scoreboard));
+                } else if(received instanceof GameOverDTO){
+                    GameOverDTO gameOver = (GameOverDTO) received;
+                    SwingUtilities.invokeLater(() -> client.finishGame(gameOver));
                 }
             }
         } catch (IOException | ClassNotFoundException e) {

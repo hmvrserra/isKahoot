@@ -1,5 +1,6 @@
 package server.game;
 
+import common.GameOverDTO;
 import common.QuestionDTO;
 import common.ScoreboardDTO;
 import concurrency.Barrier;
@@ -23,16 +24,18 @@ public class GameState {
     // private final Map<String, List<Player>> teams; // teamId --> lista de membros da equipa
     private final Map<String, Player> players; // Username --> Player
     private final Map<String, Integer> teamScores; // teamID--> points
-    private final Map<String, String> currentRoundAnswers;
     private final Map<String, ClientHandler> playersHandlers;
+    private final Map<String, Integer> currentRoundPoints; // username --> points
     private final Map<String, Integer> pendingTeamRoundPoints; // teamID--> pending points
-    private final Barrier barrier;
+    private Barrier barrier;
     private final CountDownLatch waitForPlayerLatch;
     private CountDownLatch roundLatch;
+    private CountDownLatch timer;
     private int currentQuestionIndex;
     private Question currentQuestion;
     private ScoreboardDTO scoreboard;
-    private final long roundTimeMillis = 30000;
+    private final int roundTime = 30000;
+    private List<Question> gameQuestions;
 
 
     public GameState(String roomCode, int numTeams, int numPlayersPerTeam, Quiz quiz) {
@@ -42,19 +45,19 @@ public class GameState {
         this.numPlayersPerTeam = numPlayersPerTeam;
         this.quiz = quiz;
 
-//        this.teams = new ConcurrentHashMap<>();
         this.players = new ConcurrentHashMap<>();
         this.teamScores = new ConcurrentHashMap<>();
-        this.currentRoundAnswers = new ConcurrentHashMap<>();
         this.playersHandlers = new ConcurrentHashMap<>();
+        this.currentRoundPoints = new ConcurrentHashMap<>();
         this.pendingTeamRoundPoints = new ConcurrentHashMap<>();
 
-        this.waitForPlayerLatch = new CountDownLatch(maxPlayers);
-        this.barrier = new Barrier(maxPlayers, () -> {
+        this.waitForPlayerLatch = new CountDownLatch(1, 0, 1000000, maxPlayers);
+        this.barrier = new Barrier(maxPlayers, roundTime, () -> {
             processTeamRoundPoints();
         });
 
         this.currentQuestionIndex = -1;
+        this.gameQuestions = new ArrayList<>(quiz.getQuestions());
     }
 
 
@@ -69,35 +72,35 @@ public class GameState {
         waitForPlayerLatch.countDown();
     }
 
-    public void startRound() throws IOException {
-        barrier.reset();
-        roundLatch = new CountDownLatch(maxPlayers);
-        pendingTeamRoundPoints.clear();
-        currentQuestion = requestNextQuestion();
-        if(currentQuestion == null) {
-            System.out.println("No more questions");
-            return;
-        }
-        QuestionDTO nextQuestionDTO = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions());
-        sendQuestion(nextQuestionDTO);
-    }
-
     public Question requestNextQuestion() {
-        currentQuestionIndex++;
-        if(currentQuestionIndex >= quiz.getQuestions().size()) {
-            System.out.println("Quiz has finished");
+//        currentQuestionIndex++;
+//        if(currentQuestionIndex >= quiz.getQuestions().size()) {
+//            System.out.println("Quiz has finished");
+//            return null;
+//        }
+//        return quiz.getQuestions().get(currentQuestionIndex);
+        if(gameQuestions.isEmpty()){
             return null;
         }
-        return quiz.getQuestions().get(currentQuestionIndex);
+        currentQuestionIndex = (int) (Math.random() * gameQuestions.size());
+        Question nextQuestion = gameQuestions.get(currentQuestionIndex);
+        gameQuestions.remove(currentQuestionIndex);
+        return nextQuestion;
     }
 
-    public synchronized void sendQuestion(QuestionDTO question) throws IOException {
+    public void sendQuestion(QuestionDTO question) {
         for (ClientHandler playerHandler : playersHandlers.values()) {
-            playerHandler.send(question);
+            try {
+                playerHandler.send(question);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void submitAnswer(String username, int answerIndex) throws InterruptedException, IOException {
+        if(currentQuestion == null)
+            return;
         Player player = players.get(username);
         boolean isCorrectAnswer = isCorrectAnswer(answerIndex);
         int pointsEarned = 0;
@@ -108,31 +111,41 @@ public class GameState {
                 player.addPoints(pointsEarned);
                 teamScores.merge(player.getTeamId(), pointsEarned, Integer::sum); // Nas perguntas individuais a classificação de uma equipa é a soma dos valores obtidos por cada jogador;
             }
-            roundLatch.await(roundTimeMillis);
         } else {
             if(isCorrectAnswer) {
                 pointsEarned = currentQuestion.getPoints();
                 pendingTeamRoundPoints.merge(player.getTeamId(), pointsEarned, Integer::sum);
             }
-            barrier.await(roundTimeMillis);
         }
-        updateScoreboard(username, pointsEarned);
+        currentRoundPoints.put(username, pointsEarned);
+
+        if(!currentQuestion.isTeam()) {
+            timer.countDown();
+            roundLatch.await();
+        } else  {
+            try {
+                barrier.await();
+            } finally {
+                timer.countDown();
+            }
+        }
     }
 
     public boolean isCorrectAnswer(int answerIndex) {
         return answerIndex == currentQuestion.getCorrect();
     }
 
-    public void updateScoreboard(String username, int pointsEarned) throws IOException {
-        Player player = players.get(username);
-        String teamId = player.getTeamId();
-        int totalTeamPoints = teamScores.get(teamId);
-        String[][] leaderboard = generateLeaderboard();
-
-        String position = getTeamPosition(teamId, leaderboard);
-
-        ScoreboardDTO scoreboard = new ScoreboardDTO(position, String.valueOf(pointsEarned), String.valueOf(totalTeamPoints), leaderboard);
-        playersHandlers.get(username).send(scoreboard);
+    public void updateScoreboard() throws IOException {
+        for(String username: players.keySet()) {
+            Player player = players.get(username);
+            String teamId = player.getTeamId();
+            int totalTeamPoints = teamScores.get(teamId);
+            String[][] leaderboard = generateLeaderboard();
+            String position = getTeamPosition(teamId, leaderboard);
+            int pointsEarned = currentRoundPoints.getOrDefault(username, 0);
+            ScoreboardDTO scoreboard = new ScoreboardDTO(position, String.valueOf(pointsEarned), String.valueOf(totalTeamPoints), leaderboard);
+            playersHandlers.get(username).send(scoreboard);
+        }
     }
 
     private String[][] generateLeaderboard() {
@@ -162,10 +175,53 @@ public class GameState {
 
     public void awaitPlayersAndStart() throws InterruptedException, IOException {
         System.out.println("Waiting for players to start");
-        waitForPlayerLatch.await(1000000);
+        waitForPlayerLatch.await();
 
         System.out.println("All players are ready. Starting...");
-        startRound();
+        // startRound();o
+        startGame();
+    }
+
+    private void startGame() throws IOException, InterruptedException {
+        while(true) {
+            currentQuestion = requestNextQuestion();
+            if(currentQuestion == null) {
+                System.out.println("Quiz ended");
+                break;
+            }
+            barrier = new Barrier(maxPlayers, roundTime, this::processTeamRoundPoints);
+            currentRoundPoints.clear();
+            pendingTeamRoundPoints.clear();
+
+            roundLatch = new CountDownLatch(2, 2, roundTime, maxPlayers);
+            timer = new CountDownLatch(1, 0, roundTime, maxPlayers);
+
+            QuestionDTO nextQuestionDTO = new QuestionDTO(currentQuestion.getQuestion(), currentQuestion.getOptions());
+            sendQuestion(nextQuestionDTO);
+
+            timer.await();
+
+            updateScoreboard();
+
+            Thread.sleep(5000); // só para dar um tempo para visualizar o scoreboard
+        }
+        finishGame();
+    }
+
+    private void finishGame() throws IOException {
+        String winningTeamId = "";
+        int maxScore = 0;
+        for(Map.Entry<String, Integer> entry : teamScores.entrySet()) {
+            int currentScore =  entry.getValue();
+            if(currentScore > maxScore) {
+                maxScore = currentScore;
+                winningTeamId = entry.getKey();
+            }
+        }
+        GameOverDTO gameOver = new GameOverDTO(winningTeamId);
+        for(String username: players.keySet()) {
+            playersHandlers.get(username).send(gameOver);
+        }
     }
 
     public Map<String, Player> getPlayers() {
@@ -181,7 +237,7 @@ public class GameState {
                 if(teamPoints != 0) {
                     if(teamPoints != correctPoints * numPlayersPerTeam) {
                         teamScores.merge(teamId, correctPoints, Integer::sum);
-                    } else if(teamPoints == correctPoints * numPlayersPerTeam) {
+                    } else { // if(teamPoints == correctPoints * numPlayersPerTeam) {
                         teamScores.merge(teamId, correctPoints * 2, Integer::sum);
                     }
                 }
