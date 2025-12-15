@@ -10,6 +10,11 @@ public class QuestionPanel extends JPanel implements ActionListener {
 
     private JLabel questionLabel;
     private JButton[] answerButtons;
+    private JLabel countdownLabel;
+    private Timer countdownTimer;
+    private int remainingSeconds;
+
+    private static final int ROUND_TIME_SECONDS = 30;
 
     private static final Color[] ANSWER_COLORS = {
             Color.decode("#ff5733"), // Vermelho
@@ -25,6 +30,12 @@ public class QuestionPanel extends JPanel implements ActionListener {
 
         setLayout(new BorderLayout());
         setBackground(Color.decode("#46178f"));
+
+        // Countdown
+        countdownLabel = new JLabel("30", SwingConstants.CENTER);
+        countdownLabel.setForeground(Color.WHITE);
+        countdownLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        add(countdownLabel, BorderLayout.NORTH);
 
         // Pergunta
         questionLabel = new JLabel("Loading question...", SwingConstants.CENTER);
@@ -64,6 +75,27 @@ public class QuestionPanel extends JPanel implements ActionListener {
                 answerButtons[i].setVisible(false);
             }
         }
+        startCountdown();
+    }
+
+    private void startCountdown() {
+        if (countdownTimer != null) {
+            countdownTimer.stop();
+        }
+        remainingSeconds = ROUND_TIME_SECONDS;
+        countdownLabel.setText(String.valueOf(remainingSeconds));
+        countdownTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                remainingSeconds--;
+                countdownLabel.setText(String.valueOf(remainingSeconds));
+                if (remainingSeconds <= 0) {
+                    countdownTimer.stop();
+                    disableButtons();
+                }
+            }
+        });
+        countdownTimer.start();
     }
 
     @Override
