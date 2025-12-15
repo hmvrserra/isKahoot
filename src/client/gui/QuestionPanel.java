@@ -33,7 +33,7 @@ public class QuestionPanel extends JPanel implements ActionListener {
         add(questionLabel, BorderLayout.CENTER);
 
         // Botões
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 4, 30, 0));
+        JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 30, 30));
         buttonPanel.setBackground(Color.decode("#46178f"));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 50, 40, 50));
 
@@ -54,10 +54,10 @@ public class QuestionPanel extends JPanel implements ActionListener {
     }
 
     public void setQuestion(String questionText, String[] options) {
-        questionLabel.setText(questionText);
+        questionLabel.setText("<html><center>" + questionText + "</center></html>");
         for(int i = 0; i < answerButtons.length; i++) {
             if(i < options.length) {
-                answerButtons[i].setText(options[i]);
+                answerButtons[i].setText("<html><center>" + options[i] + "</center></html>");
                 answerButtons[i].setVisible(true);
                 answerButtons[i].setEnabled(true);
             } else {
