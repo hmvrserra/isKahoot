@@ -1,4 +1,4 @@
-# is Kahoot
+# isKahoot
 Repository for the Kahoot! project for the course of Concurrent and Distributed Programming
 
 ## Project Structure
