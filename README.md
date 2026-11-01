@@ -1,5 +1,5 @@
-# PCD_Projeto
-Repository for the Kahoot project for the course of Programação Concorrente e Distribuída
+# is Kahoot
+Repository for the Kahoot! project for the course of Concurrent and Distributed Programming
 
 ## Project Structure
 
